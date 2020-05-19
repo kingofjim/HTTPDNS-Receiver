@@ -1,3 +1,4 @@
 ResultReceiver/settings.py
 venv/
 .idea/
+ResultReceiver/__pycache__/
