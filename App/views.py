@@ -23,7 +23,7 @@ def cors(f):
 
 @csrf_exempt
 @cors
-# @require_http_methods('POST')
+@require_http_methods('POST')
 def receiver(request):
     data = json.loads(request.POST['result'])
     print(data)

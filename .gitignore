@@ -2,3 +2,8 @@ ResultReceiver/settings.py
 venv/
 .idea/
 ResultReceiver/__pycache__/
+nohup.out
+test.py
+uwsgi.ini
+uwsgi.pid
+App/__pycache__/
