@@ -7,11 +7,11 @@ def test_db():
     return row
 
 def save_data(year_month, value):
-    table_name = 'report_%s' % (year_month)
+    table_name = 'sdk_report_%s' % (year_month)
     if not check_table_exist(tablename=table_name):
         create_table_report(table_name)
     with connection.cursor() as cursor:
-        query = 'insert into report_%s (ip, domain, query, response_time, datetime) value %s;' % (year_month, value)
+        query = 'insert into %s (ip, domain, query, response_time, datetime) value %s;' % (table_name, value)
         # print(query)
         cursor.execute(query)
 
