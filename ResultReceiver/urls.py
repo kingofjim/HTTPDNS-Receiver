@@ -18,7 +18,8 @@ from django.urls import path
 from App import views
 
 urlpatterns = [
-    # path('test/', views.test),
+    path('test/', views.test),
     path('admin/', admin.site.urls),
-    path('sdk/receiver/', views.receiver)
+    path('sdk/receiver/', views.receiver),
+    path('sdk/receiver/<str:theToken>/', views.receiver_token)
 ]
