@@ -74,16 +74,8 @@ def receiver_token(request, theToken):
 
 
 def test(request):
-    # print(request.headers)
-    theToken = 'c10d50257062466994bf1eeaa67d29d0'
-    token = Token(theToken)
-    try:
-        token_info = token.decode()
-        token_info[0]
-        eval(token_info[0])(request, token_info[1])
-    except KeyError:
-        print("No Token Exist - " + theToken)
-    return HttpResponse()
+
+    return HttpResponse('OK')
 
 def IE(request, device):
     ip = get_client_ip(request)
