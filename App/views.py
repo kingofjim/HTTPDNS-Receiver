@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, RawPostDataException
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -19,31 +19,6 @@ def cors(f):
         return response
     return wrapper
 
-@csrf_exempt
-@cors
-@require_http_methods('POST')
-def receiver(request):
-
-    if('result' in request.POST):
-        dataset = json.loads(request.POST['result'])
-        if dataset:
-            ip = get_client_ip(request)
-            value = ''
-            for data in dataset:
-                query = data[0]
-                domain = get_host(query)
-                response_time = data[1]
-                date = datetime.fromtimestamp(data[2]/1000) + timedelta(hours=8)
-                date = date.strftime('%Y-%m-%d %H:%M:%S')
-                value += '("%s", "%s", "%s", %s, "%s"),' % (ip, domain, query, response_time, date)
-
-            value = value[:-1]
-            year_month = datetime.now() + timedelta(hours=8)
-            year_month = year_month.strftime('%Y%m')
-            table_name = 'sdk_report_hqt_%s' % (year_month)
-            save_data(table_name, value)
-    return HttpResponse()
-
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -60,32 +35,38 @@ def get_host(url):
 
 
 @csrf_exempt
+@cors
 @require_http_methods('POST')
 def receiver_token(request, theToken):
     token = Token(theToken)
     try:
         token_info = token.decode()
-        eval(token_info[0])(request, token_info[1])
+        receiver(request, token_info[0], token_info[1])
+        return HttpResponse()
     except KeyError:
         print("No Token Exist - " + theToken)
-
-
-    return HttpResponse()
 
 
 def test(request):
 
     return HttpResponse('OK')
 
-def IE(request, device):
+def receiver(request, user, device):
     ip = get_client_ip(request)
     user_agent = request.headers['User-Agent']
+    # print(request.POST)
+    # print(request.body)
     dataset = json.loads(request.body)
+
+    print(dataset)
+    # return HttpResponse()
     value = ''
     for data in dataset:
+        print(data)
         query = data
         domain = urlparse(query).hostname
-        timestamp = datetime.fromtimestamp(dataset[data]['datetime']/1000)+timedelta(hours=8)
+        print(dataset[data]['datetime'])
+        timestamp = datetime.fromtimestamp(int(dataset[data]['datetime'])/1000)+timedelta(hours=8)
         timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
         response_time = dataset[data]['response']
 
@@ -96,5 +77,8 @@ def IE(request, device):
     value = value[:-1]
     year_month = datetime.now() + timedelta(hours=8)
     year_month = year_month.strftime('%Y%m')
-    table_name = 'sdk_report_ie_%s' % (year_month)
+    table_name = 'sdk_report_%s_%s' % (user, year_month)
     save_data(table_name, value)
+
+def token_generator(request):
+    return HttpResponse(Token.generator())

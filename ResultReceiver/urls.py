@@ -19,7 +19,8 @@ from App import views
 
 urlpatterns = [
     path('test/', views.test),
-    path('admin/', admin.site.urls),
-    path('sdk/receiver/', views.receiver),
-    path('sdk/receiver/<str:theToken>/', views.receiver_token)
+    # path('admin/', admin.site.urls),
+    # path('sdk/receiver/', views.receiver),
+    path('sdk/receiver/<str:theToken>/', views.receiver_token),
+    # path('sdk/token/generator/', views.token_generator)
 ]
