@@ -1,3 +1,4 @@
+from django.core.validators import validate_ipv4_address
 from django.http import HttpResponse, RawPostDataException
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
@@ -6,9 +7,9 @@ from urllib.parse import urlparse
 from datetime import datetime, timedelta
 from .db import save_data
 from functools import wraps
+from .token import Token
 
 # Create your views here.
-from .token import Token
 
 
 def cors(f):
@@ -53,32 +54,38 @@ def test(request):
 
 def receiver(request, user, device):
     ip = get_client_ip(request)
+    validate_ipv4_address(ip)
     user_agent = request.headers['User-Agent']
+    # exit()
     # print(request.POST)
     # print(request.body)
     dataset = json.loads(request.body)
-
+    print(ip)
+    print(user_agent)
     print(dataset)
     # return HttpResponse()
     value = ''
     for data in dataset:
-        print(data)
+        # print(data)
         query = data
         domain = urlparse(query).hostname
-        print(dataset[data]['datetime'])
+        # print(dataset[data]['datetime'])
         timestamp = datetime.fromtimestamp(int(dataset[data]['datetime'])/1000)+timedelta(hours=8)
         timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        response_time = dataset[data]['response']
+        response_time = int(dataset[data]['response'])
 
         # print(domain, query, timestamp, response_time)
-
-        value += '("%s", "%s", "%s", %s, "%s", "%s", "%s"),' % (ip, domain, query, response_time, device, user_agent, timestamp)
-
+        domain = ''
+        if domain:
+            value += '("%s", "%s", "%s", %s, "%s", %s, "%s"),' % (ip, domain, query, response_time, device, "%(user-agent)s", timestamp)
+        else:
+            print("invalid url:", domain)
+            raise Exception("invalid url:", domain)
     value = value[:-1]
     year_month = datetime.now() + timedelta(hours=8)
     year_month = year_month.strftime('%Y%m')
     table_name = 'sdk_report_%s_%s' % (user, year_month)
-    save_data(table_name, value)
+    save_data(table_name, value, user_agent)
 
 def token_generator(request):
     return HttpResponse(Token.generator())
