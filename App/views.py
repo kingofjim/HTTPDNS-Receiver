@@ -75,7 +75,6 @@ def receiver(request, user, device):
         response_time = int(dataset[data]['response'])
 
         # print(domain, query, timestamp, response_time)
-        domain = ''
         if domain:
             value += '("%s", "%s", "%s", %s, "%s", %s, "%s"),' % (ip, domain, query, response_time, device, "%(user-agent)s", timestamp)
         else:
